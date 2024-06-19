@@ -37,6 +37,9 @@ RUN pip3 install \
     adafruit-blinka \
     board \
     RPi.GPIO \
+    gpiozero \
+    lgpio \
+    pigpio \
     ds4drv
 
 # Build workspace
