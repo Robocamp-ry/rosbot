@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y \
     ros-humble-dynamixel-sdk \
     ros-humble-turtlebot3-msgs \
     ros-humble-turtlebot3 \
+    ros-humble-joy \
     libopencv-dev \
     libgpiod-dev \
     python3-libgpiod \
@@ -35,7 +36,8 @@ RUN pip3 install \
     adafruit-circuitpython-bmp280 \
     adafruit-blinka \
     board \
-    RPi.GPIO
+    RPi.GPIO \
+    ds4drv
 
 # Build workspace
 COPY . /ros2_ws

@@ -10,6 +10,8 @@ services:
       - /dev/video0:/dev/video0
       - /dev/ttyUSB0:/dev/ttyUSB0 # For LiDAR or other serial devices, adjust as needed
       - /dev/gpiomem:/dev/gpiomem
+      - /dev/input/js0:/dev/input/js0
+      - /dev/input/event5:/dev/input/event5
     volumes:
       - /dev:/dev
       - /tmp/.X11-unix:/tmp/.X11-unix

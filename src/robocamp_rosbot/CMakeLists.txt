@@ -13,8 +13,8 @@ find_package(image_transport REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(OpenCV REQUIRED)
 
-add_executable(robot_controller src/robot_controller.cpp)
-ament_target_dependencies(robot_controller rclcpp std_msgs)
+add_executable(robot_controller_node src/robot_controller_node.cpp)
+ament_target_dependencies(robot_controller_node rclcpp sensor_msgs geometry_msgs)
 
 add_executable(camera_node src/camera_node.cpp)
 ament_target_dependencies(camera_node rclcpp sensor_msgs cv_bridge image_transport)
@@ -30,7 +30,7 @@ add_executable(motor_driver_node src/motor_driver_node.cpp)
 ament_target_dependencies(motor_driver_node rclcpp geometry_msgs nav_msgs)
 
 install(TARGETS
-  robot_controller
+  robot_controller_node
   camera_node
   lidar_node
   motor_driver_node

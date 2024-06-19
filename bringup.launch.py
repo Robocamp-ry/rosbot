@@ -5,9 +5,16 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription([
         Node(
+            package='joy',
+            executable='joy_node',
+            name='joy_node',
+            output='screen',
+            parameters=[{'dev': '/dev/input/js0'}] # Adjust this if needed
+        )
+        Node(
             package='robocamp_rosbot',
-            executable='robot_controller',
-            name='robot_controller_cpp',
+            executable='robot_controller_node',
+            name='robot_controller_node_cpp',
         ),
         Node(
             package='robocamp_rosbot',

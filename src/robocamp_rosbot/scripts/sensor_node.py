@@ -21,7 +21,7 @@ class BMP280Node(Node):
         self.altitude_publisher = self.create_publisher(NavSatFix, 'bmp280/altitude', 10)
 
         # Create a timer to publish the sensor data periodically
-        self.timer = self.create_timer(5.0, self.publish_sensor_data)  # Publish every 5 seconds    
+        self.timer = self.create_timer(5.0, self.publish_sensor_data)  # Publish every 5 seconds  
 
     def publish_sensor_data(self):
         # Create and publish temperature message
@@ -44,6 +44,8 @@ class BMP280Node(Node):
         altitude_msg.header.frame_id = 'bmp280_frame'
         altitude_msg.altitude = self.bmp280.altitude
         self.altitude_publisher.publish(altitude_msg)
+
+        self.get_logger().info(f'Temperature: {temp_msg.temperature} C, Pressure: {pressure_msg.fluid_pressure} hPa, Altitude: {altitude_msg.altitude} m')
 
 def main(args=None):
     rclpy.init(args=args)

@@ -1,71 +1,78 @@
+#!/usr/bin/env python3
+
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import ColorRGBA
-import RPi.GPIO as GPIO
+from std_msgs.msg import Float32MultiArray
+from gpiozero import DigitalOutputDevice, DigitalInputDevice
 import time
-
-# GPIO pin setup for TCS3200
-S0 = 23
-S1 = 24
-S2 = 27
-S3 = 22
-OUT = 17
-
-# Frequency scaling settings
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(S0, GPIO.OUT)
-GPIO.setup(S1, GPIO.OUT)
-GPIO.setup(S2, GPIO.OUT)
-GPIO.setup(S3, GPIO.OUT)
-GPIO.setup(OUT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-GPIO.output(S0, GPIO.HIGH)
-GPIO.output(S1, GPIO.LOW)
-
-def read_color():
-    # Select red filter
-    GPIO.output(S2, GPIO.LOW)
-    GPIO.output(S3, GPIO.LOW)
-    time.sleep(0.1)
-    red = GPIO.input(OUT)
-
-    # Select green filter
-    GPIO.output(S2, GPIO.HIGH)
-    GPIO.output(S3, GPIO.HIGH)
-    time.sleep(0.1)
-    green = GPIO.input(OUT)
-
-    # Select blue filter
-    GPIO.output(S2, GPIO.LOW)
-    GPIO.output(S3, GPIO.HIGH)
-    time.sleep(0.1)
-    blue = GPIO.input(OUT)
-
-    return red, green, blue
 
 class ColorSensorNode(Node):
     def __init__(self):
         super().__init__('color_sensor_node')
-        self.publisher_ = self.create_publisher(ColorRGBA, 'color_sensor/data', 10)
-        self.timer = self.create_timer(5.0, self.publish_color_data) # Publish every 5 seconds
+
+        # Pin configuration
+        self.S0 = DigitalOutputDevice(17)
+        self.S1 = DigitalOutputDevice(27)
+        self.S2 = DigitalOutputDevice(22)
+        self.S3 = DigitalOutputDevice(23)
+        self.OUT = DigitalInputDevice(24)
+        self.OE = DigitalOutputDevice(25)
+        self.LED = DigitalOutputDevice(18)  # LED control pin
+
+        # Enable the sensor
+        self.OE.off()
+
+        # Set scaling to 20%
+        self.S0.on()
+        self.S1.off()
+
+        # Turn on the LED
+        self.LED.on()
+
+        # Publisher
+        self.publisher_ = self.create_publisher(Float32MultiArray, 'color_sensor_data', 10)
+        self.timer = self.create_timer(5.0, self.publish_color_data)
+
+    def read_frequency(self):
+        self.OUT.wait_for_active()
+        start = time.time()
+        self.OUT.wait_for_inactive()
+        end = time.time()
+        return 1 / (end - start)
+
+    def set_color_filter(self, s2, s3):
+        self.S2.value = s2
+        self.S3.value = s3
+        time.sleep(0.1)
 
     def publish_color_data(self):
-        red, green, blue = read_color()
-        msg = ColorRGBA()
-        msg.r = red
-        msg.g = green
-        msg.b = blue
-        msg.a = 1.0  # Assuming full opacity for simplicity
+        self.set_color_filter(0, 0)  # Red
+        red = self.read_frequency()
+        self.set_color_filter(1, 1)  # Green
+        green = self.read_frequency()
+        self.set_color_filter(0, 1)  # Blue
+        blue = self.read_frequency()
+
+        msg = Float32MultiArray()
+        msg.data = [red, green, blue]
         self.publisher_.publish(msg)
-        self.get_logger().info(f'Publishing color data: R={red}, G={green}, B={blue}')
+        self.get_logger().info(f'Red: {red}, Green: {green}, Blue: {blue}')
+
+        if green<red and blue<red:
+            self.get_logger().info('Red detected')
+        elif red<green and blue<green:
+            self.get_logger().info('Green detected')
+        elif red<blue and green<blue:
+            self.get_logger().info('Blue detected')
+        else:
+            self.get_logger().info('No color detected')
 
 def main(args=None):
     rclpy.init(args=args)
-    node = ColorSensorNode()
-    rclpy.spin(node)
-    node.destroy_node()
+    color_sensor_node = ColorSensorNode()
+    rclpy.spin(color_sensor_node)
+    color_sensor_node.destroy_node()
     rclpy.shutdown()
-    GPIO.cleanup()
 
 if __name__ == '__main__':
     main()

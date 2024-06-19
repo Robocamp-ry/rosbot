@@ -4,44 +4,39 @@
 #include <image_transport/image_transport.hpp>
 #include <opencv2/opencv.hpp>
 
-class CameraNode : public rclcpp::Node
-{
+class MJPGCameraPublisher : public rclcpp::Node {
 public:
-  CameraNode()
-  : Node("camera_node")
-  {
-    image_publisher_ = this->create_publisher<sensor_msgs::msg::Image>("camera/image_raw", 10);
-    cap_.open(0);
-    if (!cap_.isOpened()) {
-      RCLCPP_ERROR(this->get_logger(), "Failed to open camera!");
+    MJPGCameraPublisher()
+    : Node("mjpg_camera_publisher"), cap_("http://192.168.3.25:8000/stream.mjpg") {
+        if (!cap_.isOpened()) {
+            RCLCPP_ERROR(this->get_logger(), "Error opening video stream or file");
+        }
+
+        publisher_ = image_transport::create_publisher(this, "camera/image");
+        timer_ = this->create_wall_timer(
+            std::chrono::milliseconds(33), // Approx 30 FPS
+            std::bind(&MJPGCameraPublisher::timer_callback, this)
+        );
     }
-    timer_ = this->create_wall_timer(
-      std::chrono::milliseconds(100),
-      std::bind(&CameraNode::capture_and_publish, this));
-  }
 
 private:
-  void capture_and_publish()
-  {
-    cv::Mat frame;
-    cap_ >> frame;
-    if (!frame.empty()) {
-      auto image_msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", frame).toImageMsg();
-      image_publisher_->publish(*image_msg);
-    } else {
-      RCLCPP_WARN(this->get_logger(), "Captured empty frame!");
+    void timer_callback() {
+        cv::Mat frame;
+        cap_ >> frame;
+        if (!frame.empty()) {
+            auto msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", frame).toImageMsg();
+            publisher_.publish(msg);
+        }
     }
-  }
 
-  rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr image_publisher_;
-  cv::VideoCapture cap_;
-  rclcpp::TimerBase::SharedPtr timer_;
+    image_transport::Publisher publisher_;
+    cv::VideoCapture cap_;
+    rclcpp::TimerBase::SharedPtr timer_;
 };
 
-int main(int argc, char * argv[])
-{
-  rclcpp::init(argc, argv);
-  rclcpp::spin(std::make_shared<CameraNode>());
-  rclcpp::shutdown();
-  return 0;
+int main(int argc, char* argv[]) {
+    rclcpp::init(argc, argv);
+    rclcpp::spin(std::make_shared<MJPGCameraPublisher>());
+    rclcpp::shutdown();
+    return 0;
 }
