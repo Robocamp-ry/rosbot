@@ -9,8 +9,8 @@ def generate_launch_description():
             executable='joy_node',
             name='joy_node',
             output='screen',
-            parameters=[{'dev': '/dev/input/js0'}] # Adjust this if needed
-        )
+            parameters=[{'dev': '/dev/input/js0'}], # Adjust this if needed
+        ),
         Node(
             package='robocamp_rosbot',
             executable='robot_controller_node',
