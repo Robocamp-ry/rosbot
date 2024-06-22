@@ -42,9 +42,14 @@ RUN pip3 install \
     pigpio \
     ds4drv
 
-# Build workspace
+# Install DS4 Driver and Lidar packages
 COPY . /ros2_ws
 WORKDIR /ros2_ws
+RUN cd /ros2_ws/src && \
+    git clone https://github.com/naoki-mizuno/ds4drv --branch devel && \
+    git clone https://github.com/ldrobotSensorTeam/ldlidar_stl_ros2.git
+
+# Build workspace
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build"
 
 # Copy launch file to ROS2 workspace

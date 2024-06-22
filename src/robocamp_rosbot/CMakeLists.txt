@@ -23,16 +23,12 @@ target_link_libraries(camera_node
   ${OpenCV_LIBRARIES}
 )
 
-add_executable(lidar_node src/lidar_node.cpp)
-ament_target_dependencies(lidar_node rclcpp sensor_msgs)
-
 add_executable(motor_driver_node src/motor_driver_node.cpp)
 ament_target_dependencies(motor_driver_node rclcpp geometry_msgs nav_msgs)
 
 install(TARGETS
   robot_controller_node
   camera_node
-  lidar_node
   motor_driver_node
   DESTINATION lib/${PROJECT_NAME})
 
@@ -41,6 +37,7 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
   scripts/sensor_node.py
   scripts/color_sensor_node.py
+  ../ldlidar_stl_ros2/launch/ld19.launch.py
   DESTINATION lib/${PROJECT_NAME})
 
 ament_package()

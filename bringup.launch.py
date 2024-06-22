@@ -5,6 +5,17 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription([
         Node(
+            package='ds4_driver',
+            executable='ds4_driver/ds4_driver_node.py',
+            name='ds4_driver_node_py',
+        ),
+        Node(
+            package='ldlidar_stl_ros2',
+            executable='ld19.launch.py',
+            name='ld19_launch_py',
+            output='screen'
+        ),
+        Node(
             package='joy',
             executable='joy_node',
             name='joy_node',
@@ -20,11 +31,6 @@ def generate_launch_description():
             package='robocamp_rosbot',
             executable='camera_node',
             name='camera_node_cpp',
-        ),
-        Node(
-            package='robocamp_rosbot',
-            executable='lidar_node',
-            name='lidar_node_cpp',
         ),
         Node(
             package='robocamp_rosbot',
