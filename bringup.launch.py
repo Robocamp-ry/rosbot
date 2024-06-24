@@ -19,8 +19,8 @@ def generate_launch_description():
         ),
         Node(
             package='ldlidar_stl_ros2',
-            executable='ld19.launch.py',
-            name='ld19_launch_py',
+            executable='ldlidar_stl_ros2_node',
+            name='ld19',
             output='screen'
         ),
         Node(
