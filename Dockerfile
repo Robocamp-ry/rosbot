@@ -53,8 +53,7 @@ RUN cd /ros2_ws/src && \
 COPY . /ros2_ws
 WORKDIR /ros2_ws
 COPY 50-ds4drv.rules /etc/udev/rules.d/
-RUN udevadm control --reload-rules && \
-    udevadm trigger
+COPY start.sh /opt/
 
 # Build workspace
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build"
@@ -67,4 +66,5 @@ RUN sudo echo ". /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc \
     sudo echo ". /install/setup.bash" >> ~/.bashrc
 
 ENTRYPOINT ["/ros_entrypoint.sh"]
-CMD ["bash"]
+# We are running our entrypoint commands through the start.sh script
+CMD ["bash", "/opt/start.sh"]
