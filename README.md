@@ -36,7 +36,7 @@ cd ~/rosbot
 ### Step 2: Build the Docker Container
 
 ```bash
-sudo docker-compose up --build
+sudo docker compose up --build
 ```
 
 ### Step 3: Access the Container
