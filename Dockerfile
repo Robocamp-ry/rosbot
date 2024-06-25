@@ -49,6 +49,13 @@ RUN cd /ros2_ws/src && \
     git clone https://github.com/naoki-mizuno/ds4drv --branch devel && \
     git clone https://github.com/ldrobotSensorTeam/ldlidar_stl_ros2.git
 
+# Reload udev rules
+COPY . /ros2_ws
+WORKDIR /ros2_ws
+COPY 50-ds4drv.rules /etc/udev/rules.d/
+RUN udevadm control --reload-rules && \
+    udevadm trigger
+
 # Build workspace
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build"
 
