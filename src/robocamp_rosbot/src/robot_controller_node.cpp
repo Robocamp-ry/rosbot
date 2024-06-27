@@ -21,12 +21,12 @@ private:
     void joy_callback(const sensor_msgs::msg::Joy::SharedPtr msg)
     {
         auto twist = geometry_msgs::msg::Twist();
-
+    
         // Assuming axes[1] is the left stick vertical axis for linear speed
         // and axes[2] is the right stick horizontal axis for angular speed
         twist.linear.x = msg->axes[1];
         twist.angular.z = msg->axes[2];
-
+        
         cmd_vel_pub_->publish(twist);
     }
 
