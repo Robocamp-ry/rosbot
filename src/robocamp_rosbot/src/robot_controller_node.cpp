@@ -23,9 +23,9 @@ private:
         auto twist = geometry_msgs::msg::Twist();
 
         // Assuming axes[1] is the left stick vertical axis for linear speed
-        // and axes[2] is the right stick horizontal axis for angular speed
+        // and axes[3] is the right stick horizontal axis for angular speed
         twist.linear.x = msg->axes[1];
-        twist.angular.z = msg->axes[2];
+        twist.angular.z = msg->axes[3];
 
         cmd_vel_pub_->publish(twist);
     }

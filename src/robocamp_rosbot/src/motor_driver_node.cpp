@@ -26,8 +26,9 @@ private:
         // Translate the velocity commands to motor control signals
         // Implement your motor control logic here
 
-        double left_motor_speed = linear_velocity - angular_velocity;
-        double right_motor_speed = linear_velocity + angular_velocity;
+        // Example:
+        // double left_motor_speed = linear_velocity - angular_velocity;
+        // double right_motor_speed = linear_velocity + angular_velocity;
 
         // Control the motors with the calculated speeds
         // For example: set PWM values, send commands to motor driver, etc.

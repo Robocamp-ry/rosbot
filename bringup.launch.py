@@ -13,18 +13,9 @@ def generate_launch_description():
         'ld19.launch.py'
     )
 
-    oak_d_lite_launch_path = os.path.join(
-        get_package_share_directory('robocamp_rosbot'),
-        'scripts',
-        'oak_d_lite.node.py'
-    )
-
     return LaunchDescription([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource(ldlidar_launch_path)
-        ),
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(oak_d_lite_launch_path)
         ),
         Node(
             package='ldlidar_stl_ros2',
@@ -37,7 +28,7 @@ def generate_launch_description():
             executable='joy_node',
             name='joy_node',
             output='screen',
-            parameters=[{'dev': '/dev/input/js0'}],
+            parameters=[{'dev': '/dev/input/js0'}], # Adjust this if needed
         ),
         Node(
             package='robocamp_rosbot',
