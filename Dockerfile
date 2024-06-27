@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     python3-setuptools \
     python3-vcstool \
     git \
+    cmake \
     curl \
     wget \
     nano \
@@ -40,14 +41,16 @@ RUN pip3 install \
     gpiozero \
     lgpio \
     pigpio \
-    ds4drv
+    ds4drv \
+    depthai
 
 # Install DS4 Driver and Lidar packages
 COPY . /ros2_ws
 WORKDIR /ros2_ws
 RUN cd /ros2_ws/src && \
     git clone https://github.com/naoki-mizuno/ds4drv --branch devel && \
-    git clone https://github.com/ldrobotSensorTeam/ldlidar_stl_ros2.git
+    git clone https://github.com/ldrobotSensorTeam/ldlidar_stl_ros2.git && \
+    git clone https://github.com/luxonis/depthai-ros.git
 
 # Reload udev rules
 COPY . /ros2_ws
