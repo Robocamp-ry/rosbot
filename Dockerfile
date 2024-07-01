@@ -1,6 +1,9 @@
 # Dockerfile
 FROM ros:humble-ros-base
 
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install required packages
 RUN apt-get update && apt-get install -y \
     python3-colcon-common-extensions \
@@ -29,6 +32,8 @@ RUN apt-get update && apt-get install -y \
     libopencv-dev \
     libgpiod-dev \
     python3-libgpiod \
+    ros-humble-vision-msgs \
+    ros-humble-camera-info-manager \
     && rm -rf /var/lib/apt/lists/*
 
 # Install required Python packages
@@ -44,22 +49,53 @@ RUN pip3 install \
     ds4drv \
     depthai
 
-# Install DS4 Driver and Lidar packages
-COPY . /ros2_ws
-WORKDIR /ros2_ws
-RUN cd /ros2_ws/src && \
-    git clone https://github.com/naoki-mizuno/ds4drv --branch devel && \
-    git clone https://github.com/ldrobotSensorTeam/ldlidar_stl_ros2.git && \
-    git clone https://github.com/luxonis/depthai-ros.git
-
 # Reload udev rules
 COPY . /ros2_ws
 WORKDIR /ros2_ws
 COPY 50-ds4drv.rules /etc/udev/rules.d/
 COPY start.sh /opt/
 
+# Clone depthai-core
+RUN cd /ros2_ws/src && \
+    git clone --branch main --depth 1 https://github.com/luxonis/depthai-core.git /depthai-core && \
+    cd /depthai-core && \
+    git submodule update --init --recursive && \
+    mkdir -p build && \
+    cd build && \
+    cmake -DCMAKE_CXX_FLAGS="-fPIC" .. && \
+    make -j$(nproc) && \
+    make install
+
+# Ensure the installation directory exists
+RUN mkdir -p /ros2_ws/install/depthai/lib
+
+# Copy the depthai-core library to the install directory
+RUN cp -r /depthai-core/build/libdepthai-core* /ros2_ws/install/depthai/lib
+
+ENV CMAKE_PREFIX_PATH="/usr/local:$CMAKE_PREFIX_PATH"
+
+# Clone the remaining repositories
+RUN cd /ros2_ws/src && \
+    git clone --depth 1 https://github.com/naoki-mizuno/ds4drv --branch devel && \
+    git clone --depth 1 https://github.com/ldrobotSensorTeam/ldlidar_stl_ros2.git && \
+    git clone --depth 1 https://github.com/luxonis/depthai-ros.git
+    
+# Install dependencies with rosdep
+RUN apt update && \
+    rosdep update && \
+    rosdep install --from-paths src --ignore-src -r -y
+
+# Create necessary directory structure
+RUN mkdir -p /ros2_ws/build/ds4drv
+
+# Create an empty README.rst file
+RUN touch /ros2_ws/build/ds4drv/README.rst
+
+# Create an empty HISTORY.rst file
+RUN touch /ros2_ws/build/ds4drv/HISTORY.rst
+
 # Build workspace
-RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build"
+RUN /bin/bash -c "source /opt/ros/humble/setup.bash && colcon build --symlink-install"
 
 # Copy launch file to ROS2 workspace
 COPY bringup.launch.py /ros2_ws/install/robocamp_rosbot/share/robocamp_rosbot/bringup.launch.py
@@ -69,5 +105,6 @@ RUN sudo echo ". /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc \
     sudo echo ". /install/setup.bash" >> ~/.bashrc
 
 ENTRYPOINT ["/ros_entrypoint.sh"]
+
 # We are running our entrypoint commands through the start.sh script
 CMD ["bash", "/opt/start.sh"]
