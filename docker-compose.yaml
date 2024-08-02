@@ -13,6 +13,7 @@ services:
       - /dev/gpiomem:/dev/gpiomem
       - /dev/input/js0:/dev/input/js0
       - /dev/input/event5:/dev/input/event5
+      - /dev/bus/usb/002/001:/dev/bus/usb/002/001
     volumes:
       - /dev:/dev
       - /tmp/.X11-unix:/tmp/.X11-unix

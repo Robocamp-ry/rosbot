@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-setuptools \
     python3-vcstool \
+    python3.10-venv \
     git \
     cmake \
     curl \
@@ -34,6 +35,18 @@ RUN apt-get update && apt-get install -y \
     python3-libgpiod \
     ros-humble-vision-msgs \
     ros-humble-camera-info-manager \
+    usbutils \
+    udev \
+    libclang-dev \
+    libatk-bridge2.0 \
+    libfontconfig1-dev \
+    libfreetype6-dev \
+    libglib2.0-dev \
+    libxcb-render0-dev \
+    libxcb-shape0-dev \
+    libxcb-xfixes0-dev \
+    libxkbcommon-dev \
+    patchelf \
     && rm -rf /var/lib/apt/lists/*
 
 # Install required Python packages
@@ -47,12 +60,14 @@ RUN pip3 install \
     lgpio \
     pigpio \
     ds4drv \
-    depthai
+    depthai \
+    depthai-viewer
 
 # Reload udev rules
 COPY . /ros2_ws
 WORKDIR /ros2_ws
 COPY 50-ds4drv.rules /etc/udev/rules.d/
+COPY 80-movidius.rules /etc/udev/rules.d/
 COPY start.sh /opt/
 
 # Clone depthai-core
